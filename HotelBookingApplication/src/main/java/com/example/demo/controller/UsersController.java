@@ -27,11 +27,7 @@ public class UsersController {
     public List<UsersModel> getAllUsers(){
     	return service.getAllUsers();
     }
-//    @PostMapping("/loginUser")
-//    public String login(@RequestBody UsersModel user) {
-//        String role = service.login(user);
-//        return role != null ? role : "Login Failed Invalid Credentials";
-//    }
+
     @PostMapping("/loginUser")
     public Map<String, Object> login(@RequestBody UsersModel user) {
         Map<String, Object> response = new HashMap<>();
@@ -41,7 +37,6 @@ public class UsersController {
         );
 
         if (loggedInUser != null) {
-            // get the role_name string, not the numeric id
             String roleName = service.getRoleName(loggedInUser.getRole_id());
             response.put("role", roleName);
             response.put("userId", loggedInUser.getUser_id());

@@ -1,0 +1,20 @@
+package com.example.demo.repository;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class CustomerRepository {
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    public int getRoleIdByName(String roleName) {
+        String sql = "SELECT role_id FROM roles WHERE role_name = ?";
+        return jdbcTemplate.queryForObject(sql, Integer.class, roleName);
+    }
+
+    public void insertCustomerdetails(int userId, String patientName, String phone, String address, String gender, int age) {
+        String sql = "INSERT INTO patients (user_id, patient_name, phone, address, gender, age) VALUES (?, ?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, userId, patientName, phone, address, gender, age);
+    }
+}

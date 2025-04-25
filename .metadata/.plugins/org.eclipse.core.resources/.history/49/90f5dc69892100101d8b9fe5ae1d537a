@@ -1,0 +1,27 @@
+package com.example.demo.repository;
+
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class CustomerRepository {
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    public int getRoleIdByName(String roleName) {
+        String sql = "SELECT role_id FROM roles WHERE role_name = ?";
+        return jdbcTemplate.queryForObject(sql, Integer.class, roleName);
+    }
+
+    public int insertUserLogin(String email, String password, int roleId) {
+        String sql = "INSERT INTO user_login (email, password, role_id) VALUES (?, ?, ?)";
+        jdbcTemplate.update(sql, email, password, roleId);
+
+       
+        return jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+    }
+
+    public void insertPatientDetails(int userId, String patientName, String phone, String address, String gender, int age) {
+        String sql = "INSERT INTO patients (user_id, patient_name, phone, address, gender, age) VALUES (?, ?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, userId, patientName, phone, address, gender, age);
+    }
+}

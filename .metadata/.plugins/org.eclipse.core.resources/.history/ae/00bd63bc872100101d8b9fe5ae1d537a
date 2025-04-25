@@ -1,0 +1,36 @@
+package com.example.demo.services;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.example.demo.model.CustomerModel;
+
+public class CustomerService {
+	@Autowired
+    private CustomerRepository patientRepository;
+
+    public String registerPatient(PatientModel patient) {
+    	
+  
+        int roleId = patientRepository.getRoleIdByName("patient");
+
+
+        int userId = patientRepository.insertUserLogin(
+                patient.getEmail(),
+                patient.getPassword(),
+                roleId
+        );
+
+
+        patientRepository.insertPatientDetails(
+                userId,
+                patient.getPatient_name(),
+                patient.getPhone(),
+                patient.getAddress(),
+                patient.getGender(),
+                patient.getAge()
+        );
+
+        return "Patient registered successfully with user_id: " + userId;
+    }
+
+}

@@ -1,0 +1,14 @@
+package com.example.demo.model;
+
+import java.sql.Timestamp;
+
+public class CustomerModel {
+	private int user_id;
+	private String name;
+	private String email;
+	private String password;
+	private String phone;
+	private String roleName;
+	private int role_id;
+	private Timestamp created_at;
+}

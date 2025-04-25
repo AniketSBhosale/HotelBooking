@@ -1,0 +1,20 @@
+package com.example.demo.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import com.example.demo.model.CustomerModel;
+import com.example.demo.services.CustomerService;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:5173")
+public class CustomerController {
+
+    @Autowired
+    private CustomerService customerService;
+
+    @PostMapping("/addCustomer")
+    public String registerCustomer(@RequestBody CustomerModel customer) {
+        return customerService.registerCustomer(customer);
+    }
+}

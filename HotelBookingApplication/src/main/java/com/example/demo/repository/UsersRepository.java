@@ -30,8 +30,8 @@ public class UsersRepository {
     }
 
     public boolean isAddNewUser(UsersModel user) {
-        String sql = "INSERT INTO users (name, email, password, role_id) VALUES (?, ?, ?, ?)";
-        int result = template.update(sql, user.getName(), user.getEmail(), user.getPassword(), user.getRole_id());
+        String sql = "INSERT INTO users (name, email, password,phone, role_id) VALUES (?, ?, ?, ?,?)";
+        int result = template.update(sql, user.getName(), user.getEmail(), user.getPassword(),user.getPhone() ,user.getRole_id());
         return result > 0;
     }
 
@@ -78,9 +78,6 @@ public class UsersRepository {
         }
     }
 
-    /**
-     * Fetch the role_name string for a given role_id
-     */
     public String findRoleNameByRoleId(int roleId) {
         String sql = "SELECT role_name FROM roles WHERE role_id = ?";
         try {

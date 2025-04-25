@@ -1,0 +1,22 @@
+package com.example.demo.repository;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class CustomerRepository {
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    public int getRoleIdByName(String roleName) {
+        String sql = "SELECT role_id FROM roles WHERE role_name = ?";
+        return jdbcTemplate.queryForObject(sql, Integer.class, roleName);
+    }
+
+    public void registerCustomer() {  
+    	
+    }
+    
+    
+}
