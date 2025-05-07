@@ -1,0 +1,31 @@
+package com.example.demo.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import com.example.demo.model.LoginModel;
+import com.example.demo.services.LoginService;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:5173") // Change based on frontend URL
+public class LoginController {
+
+    @Autowired
+    private LoginService loginService;
+
+    @PostMapping("/UserLogin")
+    public ResponseEntity<?> login(@RequestBody LoginModel login) {
+        String roleName = loginService.validateLogin(login.getEmail(), login.getPassword());
+        if ("Invalid".equals(roleName)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
+        }
+
+        Integer userId = loginService.getUserId(login.getEmail(), login.getPassword());
+
+        return ResponseEntity.ok(Map.of("role", roleName, "userId", userId));
+    }
+}

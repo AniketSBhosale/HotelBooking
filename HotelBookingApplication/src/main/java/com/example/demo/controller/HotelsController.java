@@ -1,63 +1,63 @@
 package com.example.demo.controller;
+
 import com.example.demo.model.HotelsModel;
-import com.example.demo.repository.HotelsRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import com.example.demo.services.HotelsService;
+
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 @RestController
-@CrossOrigin
+@RequestMapping("/hotels")
+@CrossOrigin(origins = "http://localhost:5173")  // Allow requests from the React frontend (port 5173)
 public class HotelsController {
 
     @Autowired
-    private HotelsRepository hotelsRepository;
+    private HotelsService hotelsService;
 
-    @PostMapping("/addHotels")
-    public String addHotel(@RequestBody HotelsModel hotel) {
-        boolean added = hotelsRepository.addHotel(hotel);
-        return added ? "Hotel added successfully" : "Failed to add hotel";
-    }
-    
-    @PostMapping("/addHotels/{ownerId}")
-    public String addHotel(@PathVariable int ownerId, @RequestBody HotelsModel hotel) {
-        hotel.setOwner_id(ownerId); 
-        boolean added = hotelsRepository.addHotel(hotel);
-        return added ? "Hotel added successfully" : "Failed to add hotel";
+    // Get all hotels
+    @GetMapping
+    public ResponseEntity<List<HotelsModel>> getAllHotels() {
+        List<HotelsModel> hotels = hotelsService.getAllHotels();
+        return ResponseEntity.ok(hotels);
     }
 
-    
-    @GetMapping("/getAllHotels")
-    public List<HotelsModel> getAllHotels() {
-        return hotelsRepository.getAllHotels();
+    // Get hotels by owner
+    @GetMapping("/owners/{ownerId}/hotels")
+    public ResponseEntity<List<HotelsModel>> getHotelsByOwner(@PathVariable int ownerId) {
+        List<HotelsModel> hotels = hotelsService.getHotelsByOwner(ownerId);
+        return ResponseEntity.ok(hotels);
     }
 
-    @GetMapping("/searchHotelById{hotelId}")
-    public HotelsModel getHotelById(@PathVariable int hotelId) {
-        HotelsModel hotel = hotelsRepository.getHotelById(hotelId);
-        return hotel != null ? hotel : new HotelsModel(); 
+    // Add a hotel
+    @PostMapping("/owners/{ownerId}/hotels")
+    public ResponseEntity<String> addHotel(@PathVariable int ownerId, @RequestBody HotelsModel hotel) {
+        hotelsService.addHotel(ownerId, hotel);
+        return ResponseEntity.ok("Hotel added successfully");
     }
 
-    @PutMapping("/updateHotelById{hotelId}")
-    public List<HotelsModel> updateHotel(@PathVariable int hotelId, @RequestBody HotelsModel hotel) {
-        hotel.setHotel_id(hotelId); 
-        boolean updated = hotelsRepository.updateHotel(hotel);
-
+    // Update hotel details
+    @PutMapping("/owners/{ownerId}/hotels/{hotelId}")
+    public ResponseEntity<String> updateHotel(@PathVariable int ownerId, @PathVariable int hotelId, @RequestBody HotelsModel hotel) {
+        boolean updated = hotelsService.updateHotel(ownerId, hotelId, hotel);
         if (updated) {
-            return hotelsRepository.getAllHotels();
+            return ResponseEntity.ok("Hotel updated successfully");
         } else {
-            return null; 
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update hotel");
         }
     }
-    
-    @GetMapping("/hotels/owner/{ownerId}")
-    public List<HotelsModel> getHotelsByOwner(@PathVariable int ownerId) {
-        return hotelsRepository.getHotelsByOwnerId(ownerId);
-    }
 
-    @DeleteMapping("deleteHotelById/{hotelId}")
-    public String deleteHotel(@PathVariable int hotelId) {
-        boolean deleted = hotelsRepository.deleteHotelById(hotelId);
-        return deleted ? "Hotel deleted successfully" : "Failed to delete hotel";
+    // Delete a hotel
+    @DeleteMapping("/owners/{ownerId}/hotels/{hotelId}")
+    public ResponseEntity<String> deleteHotel(@PathVariable int ownerId, @PathVariable int hotelId) {
+        boolean deleted = hotelsService.deleteHotel(ownerId, hotelId);
+        if (deleted) {
+            return ResponseEntity.ok("Hotel deleted successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to delete hotel");
+        }
     }
-    
 }

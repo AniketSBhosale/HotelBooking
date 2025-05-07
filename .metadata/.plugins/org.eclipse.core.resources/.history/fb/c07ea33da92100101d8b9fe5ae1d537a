@@ -1,0 +1,35 @@
+package com.example.demo.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import com.example.demo.model.LoginModel;
+import com.example.demo.services.LoginService;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:5173")  // Make sure your frontend origin is allowed here
+public class LoginController {
+
+    @Autowired
+    private LoginService loginService;
+
+    @PostMapping("/UserLogin")
+    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginModel loginModel) {
+        Map<String, Object> response = new HashMap<>();
+
+        String role = loginService.validateLogin(loginModel.getEmail(), loginModel.getPassword());
+
+        if ("Invalid".equals(role)) {
+            response.put("role", "login failed invalid credentials");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
+        response.put("role", role);
+        response.put("userId", loginService.getUserId(loginModel.getEmail()));
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+}

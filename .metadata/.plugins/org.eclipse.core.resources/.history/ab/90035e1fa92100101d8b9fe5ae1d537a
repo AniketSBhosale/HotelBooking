@@ -1,0 +1,26 @@
+package com.example.demo.services;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.example.demo.repository.LoginRepository;
+
+@Service
+public class LoginService {
+
+    @Autowired
+    private LoginRepository loginRepository;
+
+    public String validateLogin(String email, String password) {
+        Integer userId = loginRepository.getUserIdByEmailAndPassword(email, password);
+        if (userId == null) {
+            System.out.println("Invalid credentials: " + email + " " + password); // Add logging
+            return "Invalid";  // Return invalid if no matching user found
+        }
+        return loginRepository.getRoleNameByUserId(userId); // Fetch the role if valid user
+    }
+
+
+    public Integer getUserIdByEmail(String email) {
+        return loginRepository.getUserIdByEmail(email); // Assuming this fetches userId based on email
+    }
+}

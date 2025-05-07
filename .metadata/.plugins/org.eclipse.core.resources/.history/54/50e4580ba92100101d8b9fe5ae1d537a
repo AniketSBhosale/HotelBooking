@@ -1,0 +1,37 @@
+package com.example.demo.controller;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import com.example.demo.model.LoginModel;
+import com.example.demo.services.LoginService;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:5173")  // Allow requests from the frontend URL
+public class LoginController {
+
+    @Autowired
+    private LoginService loginService;
+
+    @PostMapping("/UserLogin") // Ensure this path is correct for your React frontend
+    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginModel user) {
+        Map<String, Object> response = new HashMap<>();
+
+        String role = loginService.validateLogin(user.getEmail(), user.getPassword());
+        
+        if ("Invalid".equals(role)) {
+            response.put("role", "login failed invalid credentials");
+            return ResponseEntity.status(401).body(response); // Return 401 Unauthorized for failed login
+        }
+
+        response.put("role", role);
+        response.put("userId", loginService.getUserIdByEmail(user.getEmail())); // Assuming this returns userId
+        return ResponseEntity.ok(response);
+    }
+}

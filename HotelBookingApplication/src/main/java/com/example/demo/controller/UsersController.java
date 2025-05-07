@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.model.UsersModel;
@@ -18,24 +19,29 @@ public class UsersController {
     UsersService service;
 
     @PostMapping("/addUsers")
-    public String register(@RequestBody UsersModel user) {
+    public ResponseEntity<Map<String, String>> register(@RequestBody UsersModel user) {
+        Map<String, String> response = new HashMap<>();
         boolean added = service.isAddNewUser(user);
-        return added ? "User Registered Successfully" : "Registration Failed";
+        if (added) {
+            response.put("message", "User Registered Successfully");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "Registration Failed: Invalid Role or Data");
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 
     @GetMapping("/getallusers")
-    public List<UsersModel> getAllUsers(){
-    	return service.getAllUsers();
+    public List<UsersModel> getAllUsers() {
+        return service.getAllUsers();
     }
 
     @PostMapping("/loginUser")
     public Map<String, Object> login(@RequestBody UsersModel user) {
         Map<String, Object> response = new HashMap<>();
-
         UsersModel loggedInUser = service.findUserByEmailAndPassword(
             user.getEmail(), user.getPassword()
         );
-
         if (loggedInUser != null) {
             String roleName = service.getRoleName(loggedInUser.getRole_id());
             response.put("role", roleName);
@@ -43,9 +49,6 @@ public class UsersController {
         } else {
             response.put("role", "login failed invalid credentials");
         }
-
         return response;
     }
-
-
 }

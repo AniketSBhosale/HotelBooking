@@ -31,6 +31,7 @@ public class CustomerRepository {
                 roleId,
                 now);
 
+        // Return the generated user_id
         return jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
     }
 }

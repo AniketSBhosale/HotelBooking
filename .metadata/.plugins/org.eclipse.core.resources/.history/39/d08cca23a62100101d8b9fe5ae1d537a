@@ -1,0 +1,38 @@
+package com.example.demo.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import com.example.demo.model.LoginModel;
+import com.example.demo.services.LoginService;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:5173")  
+public class LoginController {
+
+    @Autowired
+    private LoginService loginService;
+
+    @PostMapping("/UserLogin")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginModel login) {
+        String roleName = loginService.validateLogin(login.getEmail(), login.getPassword());
+        LoginResponse response = new LoginResponse();
+
+        if ("Invalid".equals(roleName)) {
+            response.setMessage("Invalid email or password");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+
+        Integer userId = loginService.getUserIdByEmail(login.getEmail());
+        response.setMessage("Login successful");
+        response.setRole(roleName);
+        response.setUserId(userId);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+}

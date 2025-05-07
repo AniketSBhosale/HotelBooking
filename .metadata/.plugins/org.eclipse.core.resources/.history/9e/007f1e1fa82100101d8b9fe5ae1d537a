@@ -1,0 +1,38 @@
+package com.example.demo.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import com.example.demo.model.LoginModel;
+import com.example.demo.services.LoginService;
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:5173")  
+public class LoginController {
+
+    @Autowired
+    private LoginService loginService;
+
+    @PostMapping("/loginUser")
+    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginModel user) {
+        Map<String, Object> response = new HashMap<>();
+
+        String roleName = loginService.validateLogin(user.getEmail(), user.getPassword());
+
+        if (!roleName.equals("Invalid")) {
+            Integer userId = loginService.getUserIdByEmailAndPassword(user.getEmail(), user.getPassword());
+            response.put("role", roleName);
+            response.put("userId", userId);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.put("message", "Login failed: Invalid credentials");
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        }
+    }
+}

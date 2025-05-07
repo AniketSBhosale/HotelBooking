@@ -1,0 +1,22 @@
+package com.example.demo.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import com.example.demo.model.OwnerModel;
+import com.example.demo.services.CustomerService;
+
+@RestController
+@CrossOrigin(origins = "http://localhost:5173")
+public class OwnerController {
+
+    @Autowired
+    private OwnerService Service;
+
+    @PostMapping("/addCustomer")
+    public String registerCustomer(@RequestBody OwnerModel owner) {
+        return Service.registerOwner(owner);
+    }
+}
