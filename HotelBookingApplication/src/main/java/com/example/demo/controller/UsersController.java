@@ -1,7 +1,6 @@
 package com.example.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.model.UsersModel;
@@ -19,36 +18,39 @@ public class UsersController {
     UsersService service;
 
     @PostMapping("/addUsers")
-    public ResponseEntity<Map<String, String>> register(@RequestBody UsersModel user) {
-        Map<String, String> response = new HashMap<>();
+    public String register(@RequestBody UsersModel user) {
         boolean added = service.isAddNewUser(user);
-        if (added) {
-            response.put("message", "User Registered Successfully");
-            return ResponseEntity.ok(response);
-        } else {
-            response.put("message", "Registration Failed: Invalid Role or Data");
-            return ResponseEntity.badRequest().body(response);
-        }
+        return added ? "User Registered Successfully" : "Registration Failed";
     }
 
     @GetMapping("/getallusers")
-    public List<UsersModel> getAllUsers() {
-        return service.getAllUsers();
+    public List<UsersModel> getAllUsers(){
+    	return service.getAllUsers();
     }
-
+//    @PostMapping("/loginUser")
+//    public String login(@RequestBody UsersModel user) {
+//        String role = service.login(user);
+//        return role != null ? role : "Login Failed Invalid Credentials";
+//    }
     @PostMapping("/loginUser")
     public Map<String, Object> login(@RequestBody UsersModel user) {
         Map<String, Object> response = new HashMap<>();
+
         UsersModel loggedInUser = service.findUserByEmailAndPassword(
             user.getEmail(), user.getPassword()
         );
+
         if (loggedInUser != null) {
+            // get the role_name string, not the numeric id
             String roleName = service.getRoleName(loggedInUser.getRole_id());
             response.put("role", roleName);
             response.put("userId", loggedInUser.getUser_id());
         } else {
             response.put("role", "login failed invalid credentials");
         }
+
         return response;
     }
+
+
 }

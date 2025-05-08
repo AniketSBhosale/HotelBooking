@@ -1,63 +1,125 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.HotelsModel;
-import com.example.demo.services.HotelsService;
-
-import java.util.List;
-
+import com.example.demo.repository.HotelsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 @RestController
-@RequestMapping("/hotels")
-@CrossOrigin(origins = "http://localhost:5173")  // Allow requests from the React frontend (port 5173)
+@CrossOrigin(origins = "http://localhost:5173")
 public class HotelsController {
 
-    @Autowired
-    private HotelsService hotelsService;
+	@Autowired
+	private HotelsRepository hotelsRepository;
 
-    // Get all hotels
-    @GetMapping
-    public ResponseEntity<List<HotelsModel>> getAllHotels() {
-        List<HotelsModel> hotels = hotelsService.getAllHotels();
-        return ResponseEntity.ok(hotels);
-    }
+	@PostMapping("/addHotels")
+	public String addHotel(@RequestBody HotelsModel hotel) {
+		boolean added = hotelsRepository.addHotel(hotel);
+		return added ? "Hotel added successfully" : "Failed to add hotel";
+	}
 
-    // Get hotels by owner
-    @GetMapping("/owners/{ownerId}/hotels")
-    public ResponseEntity<List<HotelsModel>> getHotelsByOwner(@PathVariable int ownerId) {
-        List<HotelsModel> hotels = hotelsService.getHotelsByOwner(ownerId);
-        return ResponseEntity.ok(hotels);
-    }
+	@PostMapping("/addHotels/{ownerId}")
+	public String addHotel(@PathVariable int ownerId, @RequestBody HotelsModel hotel) {
+		hotel.setOwner_id(ownerId);
+		boolean added = hotelsRepository.addHotel(hotel);
+		return added ? "Hotel added successfully" : "Failed to add hotel";
+	}
 
-    // Add a hotel
-    @PostMapping("/owners/{ownerId}/hotels")
-    public ResponseEntity<String> addHotel(@PathVariable int ownerId, @RequestBody HotelsModel hotel) {
-        hotelsService.addHotel(ownerId, hotel);
-        return ResponseEntity.ok("Hotel added successfully");
-    }
+	@GetMapping("/getAllHotels")
+	public List<HotelsModel> getAllHotels() {
+		return hotelsRepository.getAllHotels();
+	}
 
-    // Update hotel details
-    @PutMapping("/owners/{ownerId}/hotels/{hotelId}")
-    public ResponseEntity<String> updateHotel(@PathVariable int ownerId, @PathVariable int hotelId, @RequestBody HotelsModel hotel) {
-        boolean updated = hotelsService.updateHotel(ownerId, hotelId, hotel);
-        if (updated) {
-            return ResponseEntity.ok("Hotel updated successfully");
+
+
+	@PutMapping("/updateHotelById{hotelId}")
+	public String updateHotel(@PathVariable int hotelId, @RequestBody HotelsModel hotel) {
+		hotel.setHotel_id(hotelId);
+		boolean updated = hotelsRepository.updateHotel(hotel);
+
+		if (updated) {
+			return "Hotel Updated Successfully...";
+		} else {
+			return null;
+		}
+	}
+
+	@GetMapping("/hotels/owner/{ownerId}")
+	public List<HotelsModel> getHotelsByOwner(@PathVariable int ownerId) {
+		return hotelsRepository.getHotelsByOwnerId(ownerId);
+	}
+	
+	@GetMapping("hotel/{hotelId}")
+    public ResponseEntity<?> getHotelById(@PathVariable int hotelId) {
+        HotelsModel hotel = hotelsRepository.getHotelById(hotelId);
+        if (hotel != null) {
+            return ResponseEntity.ok(hotel);
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update hotel");
+            return ResponseEntity.status(404).body("Hotel not found");
         }
     }
 
-    // Delete a hotel
-    @DeleteMapping("/owners/{ownerId}/hotels/{hotelId}")
-    public ResponseEntity<String> deleteHotel(@PathVariable int ownerId, @PathVariable int hotelId) {
-        boolean deleted = hotelsService.deleteHotel(ownerId, hotelId);
-        if (deleted) {
-            return ResponseEntity.ok("Hotel deleted successfully");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to delete hotel");
+	@DeleteMapping("deleteHotelById/{hotelId}")
+	public String deleteHotel(@PathVariable int hotelId) {
+		boolean deleted = hotelsRepository.deleteHotelById(hotelId);
+		return deleted ? "Hotel deleted successfully" : "Failed to delete hotel";
+	}
+
+	@PostMapping("/hotelimage/uploadImage")
+	public String uploadImage(@RequestParam("file") MultipartFile file) {
+		try {
+			// Set the uploads folder path
+			String uploadDir = "D:/HotelBooking/HotelBooking/HotelBookingApplication/uploads/hotelimages";
+		    		
+			// ✅ Automatically create the folder if missing
+	        Path uploadPath = Paths.get(uploadDir);
+	        if (!Files.exists(uploadPath)) {
+	            Files.createDirectories(uploadPath);
+	        }
+
+
+			// Save file with original filename
+			Path filePath = uploadPath.resolve(file.getOriginalFilename());
+			file.transferTo(filePath.toFile());
+
+			// Return the URL/path to access the image
+			return "http://localhost:8080/uploads/hotelimages/" + file.getOriginalFilename();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "Failed to upload image: " + e.getMessage();
+		}
+	}
+	
+	@GetMapping("/uploads/hotelimages/{filename:.+}")
+    public ResponseEntity<Resource> getFile(@PathVariable String filename) {
+        try {
+            Path filePath = Paths.get("uploads/hotelimages").resolve(filename).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok()
+                    .contentType(MediaTypeFactory.getMediaType(resource)
+                            .orElse(MediaType.APPLICATION_OCTET_STREAM))
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
 }

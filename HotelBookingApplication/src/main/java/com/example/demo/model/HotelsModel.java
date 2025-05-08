@@ -1,14 +1,15 @@
 package com.example.demo.model;
 
-import lombok.Data;
 import java.sql.Timestamp;
+import lombok.Data;
 
 @Data
 public class HotelsModel {
     private int hotel_id;
-    private int owner_id;
+    private int owner_id;   
     private String name;
     private String location;
     private String category;
-    private Timestamp created_at; // Optional: will be auto-handled by DB if set as DEFAULT CURRENT_TIMESTAMP
+    private String image_url;
+    private Timestamp created_at;  
 }

@@ -2,11 +2,10 @@ package com.example.demo.services;
 
 import com.example.demo.model.HotelsModel;
 import com.example.demo.repository.HotelsRepository;
-
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class HotelsService {
@@ -14,28 +13,35 @@ public class HotelsService {
     @Autowired
     private HotelsRepository hotelsRepository;
 
-    // Get all hotels
+    // Method to get all hotels
     public List<HotelsModel> getAllHotels() {
         return hotelsRepository.getAllHotels();
     }
 
-    // Get hotels by owner
-    public List<HotelsModel> getHotelsByOwner(int ownerId) {
-        return hotelsRepository.getHotelsByOwner(ownerId);
+    public List<HotelsModel> getHotelsByOwnerId(int ownerId){
+    	return hotelsRepository.getHotelsByOwnerId(ownerId);
+    }
+    // Method to add a new hotel
+    public String addHotel(HotelsModel hotel) {
+        boolean added = hotelsRepository.addHotel(hotel);
+        return added ? "Hotel added successfully" : "Failed to add hotel";
     }
 
-    // Add a hotel
-    public void addHotel(int ownerId, HotelsModel hotel) {
-        hotelsRepository.addHotel(ownerId, hotel);
+    // Method to update a hotel and return the updated list of hotels
+    public List<HotelsModel> updateHotel(int hotelId, HotelsModel hotel) {
+        hotel.setHotel_id(hotelId); // Set the hotel_id to the URL parameter
+        boolean updated = hotelsRepository.updateHotel(hotel);
+        return updated ? hotelsRepository.getAllHotels() : null;
     }
 
-    // Update a hotel
-    public boolean updateHotel(int ownerId, int hotelId, HotelsModel hotel) {
-        return hotelsRepository.updateHotel(ownerId, hotelId, hotel);
+    // Method to delete a hotel by hotel_id
+    public String deleteHotel(int hotelId) {
+        boolean deleted = hotelsRepository.deleteHotelById(hotelId);
+        return deleted ? "Hotel deleted successfully" : "Failed to delete hotel";
     }
 
-    // Delete a hotel
-    public boolean deleteHotel(int ownerId, int hotelId) {
-        return hotelsRepository.deleteHotel(ownerId, hotelId);
+    // Method to get a hotel by its ID
+    public HotelsModel getHotelById(int hotelId) {
+        return hotelsRepository.getHotelById(hotelId);
     }
 }
